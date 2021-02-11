@@ -56,6 +56,7 @@ router.get("/courses", async (req, res) => {
   res.json({ courses });
 });
 
+// Returns the course (and its user) that is asssociated with course ID specified in the URL.
 router.get("/courses/:id", async (req, res) => {
   const course = await Course.findOne({
     where: { id: req.params.id },
@@ -75,11 +76,14 @@ router.get("/courses/:id", async (req, res) => {
   }
 });
 
+// Creates a new course
 router.post(
   "/courses",
+  authenticateUser,
   asyncHandler(async (req, res) => {
     try {
-      await Course.create(req.body);
+      const course = await Course.create(req.body);
+      res.redirect(`/api/courses/${course.id}`);
       res.status(201).end();
     } catch (err) {
       if (err.name === "SequelizeValidationError") {
@@ -92,6 +96,7 @@ router.post(
   })
 );
 
+// Updates the corresponding course determined by the id parameter
 router.put(
   "/courses/:id",
   authenticateUser,
@@ -111,14 +116,20 @@ router.put(
   })
 );
 
+// Deletes the corresponding course determined by the id parameter
 router.delete(
   "/courses/:id",
   authenticateUser,
   asyncHandler(async (req, res) => {
     const course = await Course.findByPk(req.params.id);
     if (course.userId === req.currentUser.id) {
-      course.destroy();
-      res.status(204).end();
+      try {
+        await course.destroy();
+        res.status(204).end();
+      } catch (err) {
+        const errors = err.errors.map((error) => error.message);
+        res.status(400).json({ errors });
+      }
     } else {
       res.status(403).end();
     }
