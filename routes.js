@@ -1,12 +1,15 @@
 const express = require("express");
-const router = express.Router();
 const { authenticateUser } = require("./middleware/auth-user");
 const { asyncHandler } = require("./middleware/async-handler");
 const { User, Course } = require("./db").models;
 
+// Construct a router instance.
+const router = express.Router();
+
+// Setup request body JSON parsing.
 router.use(express.json());
 
-// Returns the currently authenticated user
+// GET Route - Returns the currently authenticated user.
 router.get(
   "/users",
   authenticateUser,
@@ -23,7 +26,7 @@ router.get(
   })
 );
 
-// Creates a new user
+// POST Route - Creates a new user.
 router.post(
   "/users",
   asyncHandler(async (req, res) => {
@@ -45,7 +48,7 @@ router.post(
   })
 );
 
-// Returns a list of all courses including the user that owns each course
+// GET Route - Returns a list of all courses including the user that owns each course.
 router.get("/courses", async (req, res) => {
   const courses = await Course.findAll({
     include: [{ model: User, as: "user" }],
@@ -56,7 +59,7 @@ router.get("/courses", async (req, res) => {
   res.json({ courses });
 });
 
-// Returns the course (and its user) that is asssociated with course ID specified in the URL.
+// GET Route - Returns the course (and its user) that is asssociated with course ID specified in the id parameter.
 router.get("/courses/:id", async (req, res) => {
   const course = await Course.findOne({
     where: { id: req.params.id },
@@ -76,7 +79,7 @@ router.get("/courses/:id", async (req, res) => {
   }
 });
 
-// Creates a new course
+// POST Route - Creates a new course.
 router.post(
   "/courses",
   authenticateUser,
@@ -96,7 +99,7 @@ router.post(
   })
 );
 
-// Updates the corresponding course determined by the id parameter
+// PUT Route - Updates the corresponding course determined by the id parameter.
 router.put(
   "/courses/:id",
   authenticateUser,
@@ -116,7 +119,7 @@ router.put(
   })
 );
 
-// Deletes the corresponding course determined by the id parameter
+// DELETE Route - Deletes the corresponding course determined by the id parameter.
 router.delete(
   "/courses/:id",
   authenticateUser,

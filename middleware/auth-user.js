@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const auth = require("basic-auth");
 const { User } = require("../db").models;
 
+// Middleware to authenticate the request using Basic Authentication.
 exports.authenticateUser = async (req, res, next) => {
   let message;
   const credentials = auth(req);
