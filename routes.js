@@ -32,8 +32,7 @@ router.post(
   asyncHandler(async (req, res) => {
     try {
       await User.create(req.body);
-      res.redirect("/");
-      res.status(201).end();
+      res.status(201).location("/").end();
     } catch (err) {
       if (
         err.name === "SequelizeValidationError" ||
@@ -51,7 +50,13 @@ router.post(
 // GET Route - Returns a list of all courses including the user that owns each course.
 router.get("/courses", async (req, res) => {
   const courses = await Course.findAll({
-    include: [{ model: User, as: "user" }],
+    include: [
+      {
+        model: User,
+        as: "user",
+        attributes: { exclude: ["createdAt", "updatedAt", "password"] },
+      },
+    ],
     attributes: {
       exclude: ["createdAt", "updatedAt"],
     },
@@ -86,8 +91,7 @@ router.post(
   asyncHandler(async (req, res) => {
     try {
       const course = await Course.create(req.body);
-      res.redirect(`/api/courses/${course.id}`);
-      res.status(201).end();
+      res.status(201).location(`/api/courses/${course.id}`).end();
     } catch (err) {
       if (err.name === "SequelizeValidationError") {
         const errors = err.errors.map((error) => error.message);
